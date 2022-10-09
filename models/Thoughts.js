@@ -1,10 +1,10 @@
-const { Schema, model, Types, models } = require("mongoose");
+const { Schema, model, Types } = require("mongoose");
 
 const ReactionSchema = new Schema(
   {
     reactionId: {
       type: Schema.Types.ObjectId,
-      default: () => new Types.ObjectId(),
+      default: () => new Types.ObjectId()
     },
     reactionBody: {
       type: String,
@@ -18,13 +18,13 @@ const ReactionSchema = new Schema(
       createdAt: {
         type: Date,
         default: Date.now,
+        get: createdAtVal => dateFormat(createdAtVal)
       },
     },
   {
     toJSON: {
-      virtuals: true,
+      getters: true
     },
-    id: false,
   }
 );
 
@@ -38,6 +38,7 @@ const ThoughtsSchema = new Schema(
     createdAt: {
       type: Date,
       default: Date.now,
+      get: createdAtVal => dateFormat(createdAtVal)
     },
     username: {
       type: String,
@@ -49,8 +50,8 @@ const ThoughtsSchema = new Schema(
   {
     toJSON: {
       virtuals: true,
+      getters: true
     },
-    id: false,
   }
 );
 
@@ -58,8 +59,6 @@ ThoughtsSchema.virtual("reactionCount").get(function () {
   return this.reactions.length;
 })
 
-
-////create the model to get the prebuilt methods that Mongoose provides
 const Thought = model('thought', ThoughtsSchema);
 
 module.exports = Thought;
