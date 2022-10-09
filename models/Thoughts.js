@@ -1,6 +1,4 @@
-const { Schema, model, Types } = require("mongoose");
-//to do: format date
-//const dateFormat = require
+const { Schema, model, Types, models } = require("mongoose");
 
 const ReactionSchema = new Schema(
   {
@@ -10,50 +8,40 @@ const ReactionSchema = new Schema(
     },
     reactionBody: {
       type: String,
-      required: "Reaction is required",
+      required: true,
       maxLength: 280,
     },
     username: {
       type: String,
-      required: "Username is required",
+      required: true,
+    },
       createdAt: {
         type: Date,
         default: Date.now,
-        //get: (createdAtVal) => dateFormat(createdAtVal),
       },
     },
-    createdAt: {
-      type: Date,
-      default: Date.now,
-      //get: (createdAtVal) => dateFormat(createdAtVal),
-    },
-  },
   {
     toJSON: {
-      //enable getters
-      getters: true,
+      virtuals: true,
     },
     id: false,
-    _id: false,
   }
 );
 
-const ThoughtSchema = new Schema(
+const ThoughtsSchema = new Schema(
   {
     thoughtText: {
       type: String,
-      required: "Thought is required",
+      required: true,
       maxLength: 280,
     },
     createdAt: {
       type: Date,
       default: Date.now,
-      //use getter to format date using the dateFormat() function
-      //get: (createdAtVal) => dateFormat(createdAtVal),
     },
     username: {
       type: String,
-      required: "Username is required",
+      required: true
     },
 
     reactions: [ReactionSchema],
@@ -61,17 +49,17 @@ const ThoughtSchema = new Schema(
   {
     toJSON: {
       virtuals: true,
-      getters: true,
     },
     id: false,
   }
 );
 
-ThoughtSchema.virtual("reactionCount").get(function () {
+ThoughtsSchema.virtual("reactionCount").get(function () {
   return this.reactions.length;
-});
+})
+
 
 ////create the model to get the prebuilt methods that Mongoose provides
-const Thought = model("Thought", ThoughtSchema);
+const Thought = model('thought', ThoughtsSchema);
 
 module.exports = Thought;

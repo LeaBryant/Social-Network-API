@@ -1,36 +1,38 @@
-const { Thought, User } = require("../models");
-//methods for getting, creating, deleting, and updating thoughts
+const { Thoughts, Users } = require("../models");
+
 module.exports = {
   // Get all courses
   getThoughts(req, res) {
-    Thought.find()
+    Thoughts.find()
       .then((thoughts) => res.json(thoughts))
       .catch((err) => res.status(500).json(err));
   },
 
-  getThought(req, res) {
-    Thought.findOne({ _id: req.params.Thoughtid })
+  getThoughtID(req, res) {
+    Thoughts.findOne({ _id: req.params.thoughtID })
+      .select('-__v')
       .then((thoughts) => 
          !thoughts
-           ? res.status(404).json({ message: 'No thought with that ID' })
+           ? res.status(404).json({ message: 'No thought ID' })
            :res.json(thoughts)
       )
       .catch((err) => res.status(500).json(err));
       },
-// Create a course
+
+// Create 
 createThought(req, res) {
-  Thought.create(req.body)
+  Thoughts.create(req.body)
     .then((thoughts) => {
       return User.findOneAndUpdate(
         {_id: req.body.userId},
-        {$addToSet: { applications: application._id } },
+        {$addToSet: { thoughts: thought._id } },
         { new: true }
       );
     })
-    .then((user) =>
-    !user
+    .then((users) =>
+    !users
       ? res.status(404).json({
-          message: 'Application created, but found no user with that ID',
+          message: 'Thought is created but no user found',
         })
       : res.json('Created the application 🎉')
   )
@@ -40,9 +42,9 @@ createThought(req, res) {
   });
 },
 
-updateThought({ params, body }, res) {
-    Thought.findOneAndUpdate(
-      { _id: params.thoughtId }, 
+updateThought(req, res) {
+    Thoughts.findOneAndUpdate(
+      { _id: params.thoughtID }, 
       { $set: req.body },
       { new: true }
     )
@@ -51,59 +53,56 @@ updateThought({ params, body }, res) {
           ? res.status(404).json({ message: 'No application exist' })
           : res.json(thoughts)
       )
-      .catch((err) => {
-        console.log(err);
-        res.status(400).json(err);
-  })
+      .catch((err) =>
+        res.status(400).json(err));
 },
 
-  deleteThought({ params }, res) {
-    Thought.findOneAndRemove({ _id: params.thoughtId })
+  deleteThought(req, res) {
+    Thoughts.findOneAndDelete({ _id: req.params.thoughtId })
       .then((thoughts) => {
        !thoughts 
         ? res.status(404).json({ message: 'No thought exist' })
          : User.findOneAndUpdate(
           { _id: params.userId },
-          { $pull: { thoughts: params.thoughtId } },
+          { $pull: { thoughts: params.thoughtID } },
           { new: true }
         )
       })
-      .then((user) => 
-        !user 
-          ? res.status(404).json({ message: 'User found', 
+      .then((users) => 
+        !users 
+          ? res.status(404).json({ message: 'User not found', 
         })
-         :res.json(user)
+         :res.json({ message: 'thought deleted!' })
       )
       .catch((err) => res.status(500).json(err));
   },
 
-  addReaction({ params, body }, res) {
-    Thought.findOneAndUpdate(
-      { _id: params.thoughtId },
+  addReaction(req, res) {
+    Thoughts.findOneAndUpdate(
+      { _id: req.params.thoughtID },
       { $push: { reactions: body } },
       { new: true }
     )
-      .then((user) => 
-        !user 
-          ?res.status(404).json({ message: 'No user found!' })
-          : res.json(user)
+      .then((users) => 
+        !users 
+          ?res.status(404).json({ message: 'No thought found!' })
+          : res.json(users)
       )
       .catch((err) => res.status(500).json(err));  
     },
 
-  removeReaction({ params }, res) {
-    Thought.findOneAndUpdate(
-      { _id: params.thoughtId },
-      { $pull: { reactions: { reactionId: params.reactionId } } },
+  deleteReaction(req, res) {
+    Thoughts.findOneAndUpdate(
+      { _id: req.params.thoughtID },
+      { $pull: { reactions: { reactions: req.params.reactionID } } },
       { new: true }
     )
-      .then((user) => 
-        !user
-        ? res.status(404).json({ message: 'No user with this id!' })
-        : res.json(user)
+      .then((users) => 
+        !users
+        ? res.status(404).json({ message: 'No thought found!' })
+        : res.json(users)
         )
         .catch((err) => res.status(500).json(err));  
       },
 };
 
-module.exports = thoughtController;
